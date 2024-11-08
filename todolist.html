@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        background-image: url("./image.jpg");
+        }
+        .app {
+            width: 324px;
+            text-align: center;
+            border: solid black;
+            border-radius: 25px;
+            padding: 25px;
+            background-color: white;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+        }
+        li .display {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            align-items: center;
+            border-bottom: dotted black;
+        }
+        li .display span {
+            flex: 1;
+            text-align: left;
+        }
+        li .display .buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+        button {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 80px;
+            height: 30px;
+        }
+        button.delete {
+            background-color: red;
+            color: white;
+            border: none;
+        }
+        button.complete {
+            background-color: green;
+            color: white;
+            border: none;
+        }
+        /* input#add-task{
+            width: 25px;
+            height: 25px;
+        } */
+        input#new-task{
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <h1>To-Do List</h1>
+        <input type="text" id="new-task" placeholder="Enter new task">
+        <input type="button" id="add-task" value="Add Task">
+        <ul id="task-list"></ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskInput = document.getElementById('new-task');
+            const addTaskButton = document.getElementById('add-task');
+            const taskList = document.getElementById('task-list');
+
+            // Load tasks from LocalStorage or set to empty array if none
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+            // Function to render the task list
+            const renderTasks = () => {
+                taskList.innerHTML = '';
+                tasks.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.classList.toggle('completed', task.completed);
+
+                    li.innerHTML = `
+                        <div class="display">
+                            <span>${index + 1}. ${task.text}</span> 
+                            <div class="buttons">
+                                <button class="complete" data-index="${index}">${task.completed ? 'Undo' : 'Complete'}</button>
+                                <button class="delete" data-index="${index}">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    taskList.appendChild(li);
+                });
+            };
+
+            // Add task to the list
+            addTaskButton.addEventListener('click', () => {
+                const taskText = taskInput.value.trim();
+                if (taskText) {
+                    tasks.push({ text: taskText, completed: false });
+                    taskInput.value = '';
+                    saveTasks();
+                    renderTasks();
+                }
+            });
+
+            // Delete or complete task
+            taskList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete')) {
+                    const index = e.target.getAttribute('data-index');
+                    tasks.splice(index, 1);
+                    saveTasks();
+                    renderTasks();
+                }
+
+                if (e.target.classList.contains('complete')) {
+                    const index = e.target.getAttribute('data-index');
+                    tasks[index].completed = !tasks[index].completed;
+                    saveTasks();
+                    renderTasks();
+                }
+            });
+
+            // Save tasks to LocalStorage
+            const saveTasks = () => {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            };
+
+            // Initial render of tasks
+            renderTasks();
+        });
+    </script>
+</body>
+</html>
